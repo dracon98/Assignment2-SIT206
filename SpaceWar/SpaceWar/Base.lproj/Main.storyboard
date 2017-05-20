@@ -133,7 +133,6 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                     <connections>
-                        <outlet property="StartBtn" destination="dVN-fp-axC" id="diR-WR-KW7"/>
                         <outlet property="historyBtn" destination="vlY-3Z-TEp" id="A2v-8p-f2Y"/>
                         <outlet property="startBtn" destination="dVN-fp-axC" id="27Q-pv-N80"/>
                     </connections>

@@ -10,29 +10,35 @@ import SpriteKit
 import GameplayKit
 import CoreMotion
 
+struct CollisionCategory {
+    static let Enemy : UInt32 = 1
+    static let Bullet : UInt32 = 2
+    static let Player : UInt32 = 3
+    static let PowerUp : UInt32 = 4
+}
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var starfield:SKEmitterNode!
     var player:SKSpriteNode!
-    
+    var spawnbullet = true
     var scoreLabel:SKLabelNode!
+    var lifeLabel:SKLabelNode!
     var score:Int = 0 {
     didSet {
     scoreLabel.text = "Score: \(score)"
-    }
-    }
     
+    }
+    }
+    var life:Int = 3{
+        didSet{
+            lifeLabel.text = "Life:\(life)"
+        }
+    }
     var gameTimer:Timer!
     var shootBullet:Timer!
+    var powerup:Timer!
     
     var possibleAliens = ["BMeteorite", "SMeteorite","Enemy"]
-    
-    let alienCategory:UInt32 = 0x1 << 1
-    let photonTorpedoCategory:UInt32 = 0x1 << 0
-    
-    
-    let motionManger = CMMotionManager()
-    var xAcceleration:CGFloat = 0
     
     override func didMove(to view: SKView) {
     
@@ -42,136 +48,148 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     self.addChild(starfield)
     
     starfield.zPosition = -10*/
-    
+    // player
     player = SKSpriteNode(imageNamed: "PlayerShip")
     
     player.position = CGPoint(x: self.frame.size.width / 2, y: player.size.height / 2 + 20)
-    player.zPosition = 10
+    player.physicsBody?.affectedByGravity = false
+    player.physicsBody = SKPhysicsBody(rectangleOf: player.size)
+    player.physicsBody?.categoryBitMask = CollisionCategory.Player
+    player.physicsBody?.contactTestBitMask = CollisionCategory.Enemy
+    player.physicsBody?.contactTestBitMask = CollisionCategory.PowerUp
+    player.physicsBody?.isDynamic = false
     self.addChild(player)
     
+    //worldPhysics
     self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
     self.physicsWorld.contactDelegate = self
-    
+    // score label
     scoreLabel = SKLabelNode(text: "Score: 0")
-    scoreLabel.position = CGPoint(x: 40, y: frame.size.width - 10)
+    scoreLabel.position = CGPoint(x: 40, y: frame.size.height - 30)
     scoreLabel.fontName = "AmericanTypewriter-Bold"
     scoreLabel.fontSize = 20
     scoreLabel.fontColor = UIColor.white
     score = 0
     
     self.addChild(scoreLabel)
+    //life label
+    lifeLabel = SKLabelNode(text: "Life: 3")
     
-    
+    lifeLabel.position = CGPoint(x: frame.size.width - 60, y: frame.size.height - 30)
+    lifeLabel.fontName = "AmericanTypewriter-Bold"
+    lifeLabel.fontSize = 20
+    lifeLabel.fontColor = UIColor.white
+    self.addChild(lifeLabel)
+    //
+    //pause = SKSpriteNode(imageNamed: "Pause")
+    //pause.position = CGPoint(x: self.frame.size.width - 60 , y: player.size.height - 60)
+    //spawning bullet and enemy
     gameTimer = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
-    
+        
     shootBullet = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(fireBullet), userInfo: nil, repeats: true)
-    
-    motionManger.accelerometerUpdateInterval = 0.2
-    motionManger.startAccelerometerUpdates(to: OperationQueue.current!) { (data:CMAccelerometerData?, error:Error?) in
-    if let accelerometerData = data {
-    let acceleration = accelerometerData.acceleration
-    self.xAcceleration = CGFloat(acceleration.x) * 0.75 + self.xAcceleration * 0.25
-    }
-    }
+    //powerup = Timer.scheduledTimer(timeInterval: 6, target: self, selector: #selector(PowerUpSpawn), userInfo: nil, repeats: true)
+}
     
     
-    
-    }
     func addAlien () {
         possibleAliens = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: possibleAliens) as! [String]
         
-        let alien = SKSpriteNode(imageNamed: possibleAliens[0])
+        let enemy = SKSpriteNode(imageNamed: possibleAliens[0])
         
-        let randomAlienPosition = GKRandomDistribution(lowestValue: 0, highestValue: Int(self.frame.size.width))
-        let position = CGFloat(randomAlienPosition.nextInt())
+        let randomEnemyPosition = GKRandomDistribution(lowestValue: 0, highestValue: Int(self.frame.size.width))
+        let position = CGFloat(randomEnemyPosition.nextInt())
         
-        alien.position = CGPoint(x: position, y: self.frame.size.height + alien.size.height)
+        enemy.position = CGPoint(x: position, y: self.frame.size.height + enemy.size.height)
         
-        alien.physicsBody = SKPhysicsBody(rectangleOf: alien.size)
-        alien.physicsBody?.isDynamic = true
-        
-        alien.physicsBody?.categoryBitMask = alienCategory
-        alien.physicsBody?.contactTestBitMask = photonTorpedoCategory
-        alien.physicsBody?.collisionBitMask = 0
-        
-        self.addChild(alien)
+        enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size)
+        enemy.physicsBody?.isDynamic = true
+        enemy.physicsBody?.affectedByGravity = false
+        enemy.physicsBody?.categoryBitMask = CollisionCategory.Enemy
+        enemy.physicsBody?.contactTestBitMask = CollisionCategory.Bullet
+        enemy.physicsBody?.contactTestBitMask = CollisionCategory.Player
+        self.addChild(enemy)
         
         let animationDuration:TimeInterval = 6
         
-        var actionArray = [SKAction]()
-        
-        
-        actionArray.append(SKAction.move(to: CGPoint(x: position, y: -alien.size.height), duration: animationDuration))
-        actionArray.append(SKAction.removeFromParent())
-        
-        alien.run(SKAction.sequence(actionArray))
-        
+        let action = SKAction.move(to: CGPoint(x: position, y: -enemy.size.height), duration: animationDuration)
+        let actionDone = SKAction.removeFromParent()
+        enemy.run(SKAction.sequence([action,actionDone]))
         
     }
-    
+    func PowerUpSpawn() {
+        let PowerUp = SKSpriteNode(imageNamed: "PowerUp_Icon")
+        let randomPowerUpPosition = GKRandomDistribution(lowestValue: 0, highestValue: Int(self.frame.size.width))
+        let position = CGFloat(randomPowerUpPosition.nextInt())
+        PowerUp.zPosition = -10
+        PowerUp.position = CGPoint(x: position, y: self.frame.size.height + PowerUp.size.height)
+        PowerUp.physicsBody = SKPhysicsBody(rectangleOf: PowerUp.size)
+        PowerUp.physicsBody?.isDynamic = true
+        PowerUp.physicsBody?.affectedByGravity = false
+        PowerUp.physicsBody?.categoryBitMask = CollisionCategory.PowerUp
+        PowerUp.physicsBody?.contactTestBitMask = CollisionCategory.Player
+        PowerUp.physicsBody?.collisionBitMask = 0
+        self.addChild(PowerUp)
+        let animationDuration:TimeInterval = 6
+        
+        let action = SKAction.move(to: CGPoint(x: position, y: -PowerUp.size.height), duration: animationDuration)
+        let actionDone = SKAction.removeFromParent()
+        PowerUp.run(SKAction.sequence([action,actionDone]))
+        
+    }
     
     func fireBullet() {
         self.run(SKAction.playSoundFileNamed("torpedo.mp3", waitForCompletion: false))
         
         let bulletNode = SKSpriteNode(imageNamed: "Player_bullet")
-        bulletNode.zPosition=5
+        bulletNode.zPosition = -5
         bulletNode.position = player.position
-        bulletNode.position.y += 5
-        bulletNode.physicsBody = SKPhysicsBody(circleOfRadius: bulletNode.size.width / 2)
-        bulletNode.physicsBody?.isDynamic = true
-        
-        bulletNode.physicsBody?.categoryBitMask = photonTorpedoCategory
-        bulletNode.physicsBody?.contactTestBitMask = alienCategory
-        bulletNode.physicsBody?.collisionBitMask = 0
-        bulletNode.physicsBody?.usesPreciseCollisionDetection = true
-        
+        bulletNode.physicsBody = SKPhysicsBody(rectangleOf: bulletNode.size)
+        bulletNode.physicsBody?.affectedByGravity = false
+        bulletNode.physicsBody?.categoryBitMask = CollisionCategory.Bullet
+        bulletNode.physicsBody?.contactTestBitMask = CollisionCategory.Enemy
+        bulletNode.physicsBody?.isDynamic = false
         self.addChild(bulletNode)
         
         let animationDuration:TimeInterval = 0.3
         
-        
-        var actionArray = [SKAction]()
-        
-        actionArray.append(SKAction.move(to: CGPoint(x: player.position.x, y: self.frame.size.height + 10), duration: animationDuration))
-        actionArray.append(SKAction.removeFromParent())
-        
-        bulletNode.run(SKAction.sequence(actionArray))
-        
-        
+        //moving bullet to y value
+        let action = SKAction.move(to: CGPoint(x: player.position.x, y: self.frame.size.height + 10), duration: animationDuration)
+        let actionDone = SKAction.removeFromParent()
+        bulletNode.run(SKAction.sequence([action,actionDone]))
         
     }
     
     
     func didBegin(_ contact: SKPhysicsContact) {
-        var firstBody:SKPhysicsBody
-        var secondBody:SKPhysicsBody
+        let firstBody:SKPhysicsBody = contact.bodyA
+        let secondBody:SKPhysicsBody = contact.bodyB
         
-        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
-            firstBody = contact.bodyA
-            secondBody = contact.bodyB
-        }else{
-            firstBody = contact.bodyB
-            secondBody = contact.bodyA
+        if ((firstBody.categoryBitMask == CollisionCategory.Enemy) && (secondBody.categoryBitMask == CollisionCategory.Bullet) || (firstBody.categoryBitMask == CollisionCategory.Bullet) && (secondBody.categoryBitMask == CollisionCategory.Enemy)) {
+            CollisionWithBullet(Enemy: firstBody.node as! SKSpriteNode, Bullet:secondBody.node as! SKSpriteNode)
         }
-        
-        if (firstBody.categoryBitMask & photonTorpedoCategory) != 0 && (secondBody.categoryBitMask & alienCategory) != 0 {
-            bulletDidCollideWithAlien(bulletNode: firstBody.node as! SKSpriteNode, alienNode: secondBody.node as! SKSpriteNode)
+        if (firstBody.categoryBitMask == CollisionCategory.Enemy) && (secondBody.categoryBitMask == CollisionCategory.Player){
+            CollisionWithPlayer(Enemy: firstBody.node as! SKSpriteNode, Player: secondBody.node as! SKSpriteNode)
         }
-        
+        if (firstBody.categoryBitMask == CollisionCategory.Player) && (secondBody.categoryBitMask == CollisionCategory.Enemy){
+            CollisionWithPlayer(Enemy: secondBody.node as! SKSpriteNode, Player: firstBody.node as! SKSpriteNode)
+        }
+        if (firstBody.categoryBitMask == CollisionCategory.Player) && (secondBody.categoryBitMask == CollisionCategory.PowerUp){
+            ShieldOn(PowerUp: secondBody.node as! SKSpriteNode, Player: firstBody.node as! SKSpriteNode)
+            }
+        if (firstBody.categoryBitMask == CollisionCategory.PowerUp) && (secondBody.categoryBitMask == CollisionCategory.Player){
+            ShieldOn(PowerUp: firstBody.node as! SKSpriteNode, Player: secondBody.node as! SKSpriteNode)
+        }
     }
-    
-    
-    func bulletDidCollideWithAlien (bulletNode:SKSpriteNode, alienNode:SKSpriteNode) {
-        
+    func CollisionWithBullet(Enemy: SKSpriteNode, Bullet: SKSpriteNode) {
         let explosion = SKEmitterNode(fileNamed: "Explosion.sks")!
         explosion.particleScale = 0.05
-        explosion.position = alienNode.position
+        explosion.position = Enemy.position
         self.addChild(explosion)
- 
+        
         self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
         
-        bulletNode.removeFromParent()
-        alienNode.removeFromParent()
+        Enemy.removeFromParent()
+        Bullet.removeFromParent()
         
         
         self.run(SKAction.wait(forDuration: 2)) {
@@ -179,9 +197,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         score += 5
+    }
+    
+    func ShieldOn(PowerUp: SKSpriteNode, Player: SKSpriteNode){
+        
+        let shield = SKSpriteNode(imageNamed: "Shield")
+        shield.zPosition = -15
+        shield.position = Player.position
+        self.addChild(shield)
+        PowerUp.removeFromParent()
+        self.run(SKAction.wait(forDuration: 5)) {
+            shield.removeFromParent()
+        }
         
         
     }
+ 
+    func CollisionWithPlayer(Enemy: SKSpriteNode, Player: SKSpriteNode){
+        
+        Enemy.removeFromParent()
+        life -= 1
+        Health(Player: life, Location: Player)
+    }
+    
+    
+    func Health(Player:Int, Location: SKSpriteNode){
+        if Player == 0 {
+            let explosion = SKEmitterNode(fileNamed: "PlayerExplosion.sks")!
+            explosion.particleScale = 0.5
+            explosion.position = Location.position
+            self.addChild(explosion)
+            Location.removeFromParent()
+            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+            self.run(SKAction.wait(forDuration: 2)) {
+                explosion.removeFromParent()
+            }
+            shootBullet.invalidate()
+        }
+        else{
+            self.run(SKAction.playSoundFileNamed("LoseHealth.mp3", waitForCompletion: false))
+        }
+    }
+    
     
     var touched:Bool = false
     var location = CGPoint.zero
@@ -189,8 +246,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         touched = true
-        for touch in touches {
-            location = touch.location(in:self)
+        for player in touches {
+            location = player.location(in:self)
         }
     }
     
