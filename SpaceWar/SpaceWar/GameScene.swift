@@ -23,6 +23,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var spawnbullet = true
     var scoreLabel:SKLabelNode!
     var lifeLabel:SKLabelNode!
+    var pause:SKSpriteNode!
     var score:Int = 0 {
     didSet {
     scoreLabel.text = "Score: \(score)"
@@ -81,8 +82,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     lifeLabel.fontColor = UIColor.white
     self.addChild(lifeLabel)
     //
-    //pause = SKSpriteNode(imageNamed: "Pause")
-    //pause.position = CGPoint(x: self.frame.size.width - 60 , y: player.size.height - 60)
+    pause = SKSpriteNode(imageNamed: "Pause")
+    pause.position = CGPoint(x: self.frame.size.width - 60 , y: player.size.height - 60)
+    self.addChild(pause)
     //spawning bullet and enemy
     gameTimer = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
         
@@ -248,6 +250,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         touched = true
         for player in touches {
             location = player.location(in:self)
+        }
+        for touch in touches{
+            location = touch.location(in:self)
+            
+            if pause.contains(location){
+                let skView1 = self.view as SKView!
+                let skView = self.view as SKView!
+                skView1?.scene?.isPaused = false
+                skView?.isPaused = false
+            }
         }
     }
     
