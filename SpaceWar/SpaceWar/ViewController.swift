@@ -1,6 +1,4 @@
-//
-//  ViewController.swift
-//  SpaceWar
+ 
 //
 //  Created by RICHARDO WIJAYA on 16/05/2017.
 //  Copyright © 2017 RICHARDO WIJAYA. All rights reserved.

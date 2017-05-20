@@ -23,6 +23,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     var gameTimer:Timer!
+    var shootBullet:Timer!
     
     var possibleAliens = ["BMeteorite", "SMeteorite","Enemy"]
     
@@ -35,16 +36,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func didMove(to view: SKView) {
     
-    starfield = SKEmitterNode(fileNamed: "Starfield")
+    /*starfield = SKEmitterNode(fileNamed: "Starfield")
     starfield.position = CGPoint(x: 0, y: 1472)
     starfield.advanceSimulationTime(10)
     self.addChild(starfield)
     
-    starfield.zPosition = -1
+    starfield.zPosition = -10*/
     
     player = SKSpriteNode(imageNamed: "PlayerShip")
     
-    player.position = CGPoint(x: self.frame.size.width + 40, y: player.size.height - 500)
+    player.position = CGPoint(x: self.frame.size.width / 2, y: player.size.height / 2 + 20)
     
     self.addChild(player)
     
@@ -63,6 +64,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     gameTimer = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
     
+    shootBullet = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(fireBullet), userInfo: nil, repeats: true)
     
     motionManger.accelerometerUpdateInterval = 0.2
     motionManger.startAccelerometerUpdates(to: OperationQueue.current!) { (data:CMAccelerometerData?, error:Error?) in
@@ -80,7 +82,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let alien = SKSpriteNode(imageNamed: possibleAliens[0])
         
-        let randomAlienPosition = GKRandomDistribution(lowestValue: 0, highestValue: 0)
+        let randomAlienPosition = GKRandomDistribution(lowestValue: 0, highestValue: Int(self.frame.size.width))
         let position = CGFloat(randomAlienPosition.nextInt())
         
         alien.position = CGPoint(x: position, y: self.frame.size.height + alien.size.height)
@@ -107,9 +109,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        fireBullet()
-    }
     
     func fireBullet() {
         self.run(SKAction.playSoundFileNamed("torpedo.mp3", waitForCompletion: false))
@@ -163,9 +162,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func bulletDidCollideWithAlien (bulletNode:SKSpriteNode, alienNode:SKSpriteNode) {
         
-        let explosion = SKEmitterNode(fileNamed: "Explosion")!
+        /*let explosion = SKEmitterNode(fileNamed: "Explosion")!
         explosion.position = alienNode.position
-        self.addChild(explosion)
+        self.addChild(explosion)*/
         
         self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
         
@@ -173,32 +172,55 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         alienNode.removeFromParent()
         
         
-        self.run(SKAction.wait(forDuration: 2)) {
+        /*self.run(SKAction.wait(forDuration: 2)) {
             explosion.removeFromParent()
-        }
+        }*/
         
         score += 5
         
         
     }
     
-    override func didSimulatePhysics() {
-        
-        player.position.x += xAcceleration * 50
-        
-        if player.position.x < -20 {
-            player.position = CGPoint(x: self.size.width + 20, y: player.position.y)
-        }else if player.position.x > self.size.width + 20 {
-            player.position = CGPoint(x: -20, y: player.position.y)
+    var touched:Bool = false
+    var location = CGPoint.zero
+
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        touched = true
+        for touch in touches {
+            location = touch.location(in:self)
         }
-        
     }
     
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            location = touch.location(in: self)
+        }
+    }
     
-    
-    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // Stop node from moving to touch
+        touched = false
+    }
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        if (touched) {
+            moveNodeToLocation()
+        }
     }
+    
+    // Move the node to the location of the touch
+    func moveNodeToLocation() {
+        // Compute vector components in direction of the touch
+        var dx = location.x - player.position.x
+        var dy = location.y - player.position.y
+        // How fast to move the node. Adjust this as needed
+        let speed:CGFloat = 0.25
+        // Scale vector
+        dx = dx * speed
+        dy = dy * speed
+        player.position = CGPoint(x:player.position.x+dx, y:player.position.y+dy)
+    }
+
 }
