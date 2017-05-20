@@ -46,16 +46,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     player = SKSpriteNode(imageNamed: "PlayerShip")
     
     player.position = CGPoint(x: self.frame.size.width / 2, y: player.size.height / 2 + 20)
-    
+    player.zPosition = 10
     self.addChild(player)
     
     self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
     self.physicsWorld.contactDelegate = self
     
     scoreLabel = SKLabelNode(text: "Score: 0")
-    scoreLabel.position = CGPoint(x: 10, y: 10)
+    scoreLabel.position = CGPoint(x: 40, y: frame.size.width - 10)
     scoreLabel.fontName = "AmericanTypewriter-Bold"
-    scoreLabel.fontSize = 36
+    scoreLabel.fontSize = 20
     scoreLabel.fontColor = UIColor.white
     score = 0
     
@@ -114,6 +114,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.run(SKAction.playSoundFileNamed("torpedo.mp3", waitForCompletion: false))
         
         let bulletNode = SKSpriteNode(imageNamed: "Player_bullet")
+        bulletNode.zPosition=5
         bulletNode.position = player.position
         bulletNode.position.y += 5
         bulletNode.physicsBody = SKPhysicsBody(circleOfRadius: bulletNode.size.width / 2)
@@ -162,19 +163,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func bulletDidCollideWithAlien (bulletNode:SKSpriteNode, alienNode:SKSpriteNode) {
         
-        /*let explosion = SKEmitterNode(fileNamed: "Explosion")!
+        let explosion = SKEmitterNode(fileNamed: "Explosion.sks")!
+        explosion.particleScale = 0.05
         explosion.position = alienNode.position
-        self.addChild(explosion)*/
-        
+        self.addChild(explosion)
+ 
         self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
         
         bulletNode.removeFromParent()
         alienNode.removeFromParent()
         
         
-        /*self.run(SKAction.wait(forDuration: 2)) {
+        self.run(SKAction.wait(forDuration: 2)) {
             explosion.removeFromParent()
-        }*/
+        }
         
         score += 5
         
@@ -191,6 +193,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             location = touch.location(in:self)
         }
     }
+    
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
