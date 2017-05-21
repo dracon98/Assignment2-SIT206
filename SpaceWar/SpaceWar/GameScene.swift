@@ -24,6 +24,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var scoreLabel:SKLabelNode!
     var lifeLabel:SKLabelNode!
     var pause:SKSpriteNode!
+    var Continue: SKLabelNode!
     var score:Int = 0 {
     didSet {
     scoreLabel.text = "Score: \(score)"
@@ -38,11 +39,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var gameTimer:Timer!
     var shootBullet:Timer!
     var powerup:Timer!
+    var highscore = Int()
     
     var possibleAliens = ["BMeteorite", "SMeteorite","Enemy"]
     
     override func didMove(to view: SKView) {
     
+    let hsDefault = UserDefaults.standard
+        
+        if(hsDefault.value(forKey: "Highscore") != nil){
+            highscore = hsDefault.value(forKey: "Highscore") as! NSInteger
+        }
+        else{
+            highscore = 0
+        }
     /*starfield = SKEmitterNode(fileNamed: "Starfield")
     starfield.position = CGPoint(x: 0, y: 1472)
     starfield.advanceSimulationTime(10)
@@ -59,6 +69,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     player.physicsBody?.contactTestBitMask = CollisionCategory.Enemy
     player.physicsBody?.contactTestBitMask = CollisionCategory.PowerUp
     player.physicsBody?.isDynamic = false
+    player.zPosition = 100
     self.addChild(player)
     
     //worldPhysics
@@ -81,12 +92,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     lifeLabel.fontSize = 20
     lifeLabel.fontColor = UIColor.white
     self.addChild(lifeLabel)
-    //
+    // pause button
     pause = SKSpriteNode(imageNamed: "Pause")
-    pause.position = CGPoint(x: self.frame.size.width - 60 , y: player.size.height - 60)
+    pause.position = CGPoint(x: self.frame.size.width - 60, y: player.size.height / 4 * 3 )
+    pause.size = CGSize(width: 30, height: 30)
+        pause.zPosition = -10;
     self.addChild(pause)
+    // continue
+    Continue = SKLabelNode(text: "Continue")
+    Continue.isHidden = true
+    Continue.position = CGPoint(x: frame.size.width / 2, y: frame.size.height / 2)
+    Continue.fontName = "AmericanTypewriter-Bold"
+    Continue.fontSize = 30
+    Continue.fontColor = UIColor.white
+        self.addChild(Continue)
     //spawning bullet and enemy
-    gameTimer = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
+    gameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
         
     shootBullet = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(fireBullet), userInfo: nil, repeats: true)
     //powerup = Timer.scheduledTimer(timeInterval: 6, target: self, selector: #selector(PowerUpSpawn), userInfo: nil, repeats: true)
@@ -167,7 +188,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let secondBody:SKPhysicsBody = contact.bodyB
         
         if ((firstBody.categoryBitMask == CollisionCategory.Enemy) && (secondBody.categoryBitMask == CollisionCategory.Bullet) || (firstBody.categoryBitMask == CollisionCategory.Bullet) && (secondBody.categoryBitMask == CollisionCategory.Enemy)) {
-            CollisionWithBullet(Enemy: firstBody.node as! SKSpriteNode, Bullet:secondBody.node as! SKSpriteNode)
+            CollisionWithBullet(Enemy: firstBody.node as! SKSpriteNode, Bullet: secondBody.node as! SKSpriteNode)
         }
         if (firstBody.categoryBitMask == CollisionCategory.Enemy) && (secondBody.categoryBitMask == CollisionCategory.Player){
             CollisionWithPlayer(Enemy: firstBody.node as! SKSpriteNode, Player: secondBody.node as! SKSpriteNode)
@@ -220,6 +241,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         Enemy.removeFromParent()
         life -= 1
         Health(Player: life, Location: Player)
+        
     }
     
     
@@ -230,35 +252,84 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             explosion.position = Location.position
             self.addChild(explosion)
             Location.removeFromParent()
+            shootBullet.invalidate()
+            gameTimer.invalidate()
+            let scoreDefault = UserDefaults.standard
+            scoreDefault.setValue(score, forKey: "Score")
+            if (score > highscore){
+                let hsDefault = UserDefaults.standard
+                hsDefault.setValue(score, forKey: "Highscore")
+            }
+            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+            self.run(SKAction.wait(forDuration: 2)) {
+                explosion.removeFromParent()
+                self.run(SKAction.wait(forDuration: 3)){
+                    self.scoreLabel.removeFromParent()
+                    self.Continue.removeFromParent()
+                    self.pause.removeFromParent()
+                    self.lifeLabel.removeFromParent()
+                    let transition = SKTransition.flipHorizontal(withDuration: 0.5)
+                    let gameOver = SKScene(fileNamed: "GameOverScene") as! GameOverScene
+                    self.view?.presentScene(gameOver, transition: transition)
+                }
+            }
+            
+        }
+        else{
+            
+            self.run(SKAction.playSoundFileNamed("LoseHealth.mp3", waitForCompletion: false))
+            let explosion = SKEmitterNode(fileNamed: "Damage.sks")!
+            explosion.particleScale = 0.5
+            explosion.position = Location.position
+            self.addChild(explosion)
             self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
             self.run(SKAction.wait(forDuration: 2)) {
                 explosion.removeFromParent()
             }
-            shootBullet.invalidate()
         }
-        else{
-            self.run(SKAction.playSoundFileNamed("LoseHealth.mp3", waitForCompletion: false))
-        }
+        
     }
     
     
     var touched:Bool = false
     var location = CGPoint.zero
-
+    var pause_button = CGPoint.zero
+    var continue_button = CGPoint.zero
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         touched = true
-        for player in touches {
-            location = player.location(in:self)
+        for playerlocation in touches {
+            location = playerlocation.location(in:self)
+            
+            if player.contains(location){
+                location = playerlocation.location(in: self)
+            }
+            else {
+                location = player.position
+            }
         }
         for touch in touches{
-            location = touch.location(in:self)
+            pause_button = touch.location(in:self)
             
-            if pause.contains(location){
-                let skView1 = self.view as SKView!
-                let skView = self.view as SKView!
-                skView1?.scene?.isPaused = false
-                skView?.isPaused = false
+            if pause.contains(pause_button){
+                Continue.isHidden =  false
+                Continue.colorBlendFactor = 0.2
+                self.isPaused = true
+                shootBullet.invalidate()
+                gameTimer.invalidate()
+                
+            
+            }
+        }
+        for area in touches{
+            continue_button = area.location(in: self)
+            
+            if Continue.contains(continue_button){
+                self.isPaused = false
+                gameTimer = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
+                
+                shootBullet = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(fireBullet), userInfo: nil, repeats: true)
+                Continue.isHidden = true
             }
         }
     }
@@ -273,7 +344,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         // Stop node from moving to touch
         touched = false
+        for touch in touches{
+            pause_button = touch.location(in:self)
+            
+            if pause.contains(pause_button){
+
+                Continue.colorBlendFactor = 1
+                
+            }
+        }
     }
+
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
