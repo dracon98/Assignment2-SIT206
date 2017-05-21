@@ -1,9 +1,9 @@
 //
 //  MenuScene.swift
-//  SpacegameReloaded
+//  SpaceWar
 //
-//  Created by Daniel Autenrieth on 03/11/2016.
-//  Copyright © 2016 Training. All rights reserved.
+//  Created by RICHARDO WIJAYA on 16/05/2017.
+//  Copyright © 2017 RICHARDO WIJAYA. All rights reserved.
 //
 
 import UIKit
