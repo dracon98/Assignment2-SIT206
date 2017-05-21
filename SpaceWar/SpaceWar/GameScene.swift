@@ -53,12 +53,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         else{
             highscore = 0
         }
-    /*starfield = SKEmitterNode(fileNamed: "Starfield")
+    starfield = SKEmitterNode(fileNamed: "Starfield")
     starfield.position = CGPoint(x: 0, y: 1472)
-    starfield.advanceSimulationTime(10)
+    starfield.advanceSimulationTime(1)
     self.addChild(starfield)
     
-    starfield.zPosition = -10*/
+    starfield.zPosition = -20
     // player
     player = SKSpriteNode(imageNamed: "PlayerShip")
     

@@ -17,11 +17,13 @@ class GameOverScene: SKScene {
     var hsDefault : Int = 0
     var scoreLabel:SKLabelNode!
     var newGameButtonNode:SKSpriteNode!
+    var mainMenuNode:SKSpriteNode!
     var hsLabel:SKLabelNode!
        
     override func didMove(to view: SKView) {
         
-        
+        mainMenuNode = self.childNode(withName: "mainMenu") as! SKSpriteNode
+        mainMenuNode.texture = SKTexture(imageNamed: "mainMenu")
         
         newGameButtonNode = self.childNode(withName: "newGameButton") as! SKSpriteNode
         newGameButtonNode.texture = SKTexture(imageNamed: "newGameButton")
@@ -32,7 +34,7 @@ class GameOverScene: SKScene {
         
         scoreLabel = self.childNode(withName: "scoreLabel") as! SKLabelNode
         scoreLabel.text = "\(score!)"
-        NSLog("\(highscore)")
+        NSLog("highscore : \(highscore!)")
         hsLabel = self.childNode(withName: "hsLabel") as! SKLabelNode
         hsLabel.text = "\(highscore!)"
     }
@@ -42,14 +44,19 @@ class GameOverScene: SKScene {
         let touch = touches.first
         if let location = touch?.location(in: self) {
             let node = self.nodes(at: location)
-            
+            NSLog("\(node)")
             if node[0].name == "newGameButton" {
                 let transition = SKTransition.flipHorizontal(withDuration: 0.5)
                 let gameScene = GameScene(size: self.size)
                 self.view!.presentScene(gameScene, transition: transition)
             }
+            if node[0].name == "mainMenu" {
+                let transition = SKTransition.flipHorizontal(withDuration: 0.5)
+                let gameScene = MenuScene(size: self.size)
+                gameScene.hsMain = self.highscore
+                self.view!.presentScene(gameScene, transition: transition)
+            }
         }
-
     }
     
 }
