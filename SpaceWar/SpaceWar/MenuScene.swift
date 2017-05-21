@@ -19,6 +19,7 @@ class MenuScene: SKScene {
     var SpaceWar:SKLabelNode!
     var hsMain = Int()
     var labelScore:SKLabelNode!
+    var history:SKLabelNode!
     
     override func didMove(to view: SKView) {
     
@@ -28,7 +29,6 @@ class MenuScene: SKScene {
         addChild(playButtonNode)
         IconNode = SKSpriteNode(imageNamed: "Icon")
         IconNode.position = CGPoint(x: 200, y: 200)
-        
         
         
         

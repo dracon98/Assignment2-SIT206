@@ -43,7 +43,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var powerup:Timer!
     var highscore = Int()
     
-    var possibleAliens = ["BMeteorite", "SMeteorite","Enemy"]
+    var possibleEnemy = ["BMeteorite", "SMeteorite","Enemy"]
     
     override func didMove(to view: SKView) {
     
@@ -115,17 +115,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     exit.size = CGSize(width: 275, height: 55)
         addChild(exit)
     //spawning bullet and enemy
-    gameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
+    gameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(addEnemy), userInfo: nil, repeats: true)
         
     shootBullet = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(fireBullet), userInfo: nil, repeats: true)
     powerup = Timer.scheduledTimer(timeInterval: 15, target: self, selector: #selector(PowerUpSpawn), userInfo: nil, repeats: true)
 }
     
     
-    func addAlien () {
-        possibleAliens = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: possibleAliens) as! [String]
+    func addEnemy () {
+        possibleEnemy = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: possibleEnemy) as! [String]
         
-        let enemy = SKSpriteNode(imageNamed: possibleAliens[0])
+        let enemy = SKSpriteNode(imageNamed: possibleEnemy[0])
         
         let randomEnemyPosition = GKRandomDistribution(lowestValue: 30, highestValue: Int(self.frame.size.width - 30))
         let position = CGFloat(randomEnemyPosition.nextInt())
@@ -365,7 +365,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             if Continue.contains(continue_button){
                 self.isPaused = false
-                gameTimer = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(addAlien), userInfo: nil, repeats: true)
+                gameTimer = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(addEnemy), userInfo: nil, repeats: true)
                 powerup = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(PowerUpSpawn), userInfo: nil, repeats: true)
                 shootBullet = Timer.scheduledTimer(timeInterval: 0.75, target: self, selector: #selector(fireBullet), userInfo: nil, repeats: true)
                 Continue.isHidden = true

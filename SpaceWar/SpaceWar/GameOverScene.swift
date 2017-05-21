@@ -2,7 +2,7 @@
 //  GameOver.swift
 //  SpaceWar
 //
-//  Created by RICHARDO WIJAYA on 16/05/2017.
+//  Created by RICHARDO WIJAYA on 21/05/2017.
 //  Copyright © 2017 RICHARDO WIJAYA. All rights reserved.
 //
 
@@ -20,7 +20,7 @@ class GameOverScene: SKScene {
     var mainMenuNode:SKSpriteNode!
     var hsLabel:SKLabelNode!
     var history = String()
-       
+    
     override func didMove(to view: SKView) {
         
         mainMenuNode = self.childNode(withName: "mainMenu") as! SKSpriteNode
