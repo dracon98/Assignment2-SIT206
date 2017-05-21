@@ -25,9 +25,9 @@
 		475852961ECAA72900991FE4 /* explosion.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852941ECAA72900991FE4 /* explosion.mp3 */; };
 		475852971ECAA72900991FE4 /* explosion.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852941ECAA72900991FE4 /* explosion.mp3 */; };
 		475852981ECAA72900991FE4 /* explosion.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852941ECAA72900991FE4 /* explosion.mp3 */; };
-		475852991ECAA72900991FE4 /* torpedo.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852951ECAA72900991FE4 /* torpedo.mp3 */; };
-		4758529A1ECAA72900991FE4 /* torpedo.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852951ECAA72900991FE4 /* torpedo.mp3 */; };
-		4758529B1ECAA72900991FE4 /* torpedo.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852951ECAA72900991FE4 /* torpedo.mp3 */; };
+		475852991ECAA72900991FE4 /* missile.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852951ECAA72900991FE4 /* missile.mp3 */; };
+		4758529A1ECAA72900991FE4 /* missile.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852951ECAA72900991FE4 /* missile.mp3 */; };
+		4758529B1ECAA72900991FE4 /* missile.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 475852951ECAA72900991FE4 /* missile.mp3 */; };
 		4797E4BE1ED05EAF00088E82 /* PlayerExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = 4797E4BD1ED05EAF00088E82 /* PlayerExplosion.sks */; };
 		4797E4C01ED0729900088E82 /* LoseHealth.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 4797E4BF1ED0729900088E82 /* LoseHealth.mp3 */; };
 		4797E4CA1ED0752F00088E82 /* Assignment2_Assets in Resources */ = {isa = PBXBuildFile; fileRef = 4797E4C91ED0752F00088E82 /* Assignment2_Assets */; };
@@ -77,7 +77,7 @@
 		4758528C1ECA8F0A00991FE4 /* Explosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Explosion.sks; sourceTree = "<group>"; };
 		4758528D1ECA8F0A00991FE4 /* Starfield.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Starfield.sks; sourceTree = "<group>"; };
 		475852941ECAA72900991FE4 /* explosion.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = explosion.mp3; sourceTree = "<group>"; };
-		475852951ECAA72900991FE4 /* torpedo.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = torpedo.mp3; sourceTree = "<group>"; };
+		475852951ECAA72900991FE4 /* missile.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = missile.mp3; sourceTree = "<group>"; };
 		4797E4BD1ED05EAF00088E82 /* PlayerExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = PlayerExplosion.sks; sourceTree = "<group>"; };
 		4797E4BF1ED0729900088E82 /* LoseHealth.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = LoseHealth.mp3; sourceTree = "<group>"; };
 		4797E4C91ED0752F00088E82 /* Assignment2_Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assignment2_Assets; sourceTree = "<group>"; };
@@ -154,7 +154,7 @@
 				47F51AC41ED11856002E5ADC /* Damage.sks */,
 				4758528D1ECA8F0A00991FE4 /* Starfield.sks */,
 				475852941ECAA72900991FE4 /* explosion.mp3 */,
-				475852951ECAA72900991FE4 /* torpedo.mp3 */,
+				475852951ECAA72900991FE4 /* missile.mp3 */,
 				47F51AEA1ED18320002E5ADC /* Base.lproj */,
 				4797E4BF1ED0729900088E82 /* LoseHealth.mp3 */,
 				4797E4C91ED0752F00088E82 /* Assignment2_Assets */,
@@ -304,7 +304,7 @@
 				47F51AEB1ED18320002E5ADC /* Base.lproj in Resources */,
 				475852671ECA8CDF00991FE4 /* LaunchScreen.storyboard in Resources */,
 				4758525B1ECA8CDF00991FE4 /* Actions.sks in Resources */,
-				475852991ECAA72900991FE4 /* torpedo.mp3 in Resources */,
+				475852991ECAA72900991FE4 /* missile.mp3 in Resources */,
 				47F51AEE1ED1839D002E5ADC /* Main.storyboard in Resources */,
 				47DBBEB51ECFD5E20050D143 /* GameScene.sks in Resources */,
 				4797E4BE1ED05EAF00088E82 /* PlayerExplosion.sks in Resources */,
@@ -319,7 +319,7 @@
 			files = (
 				475852971ECAA72900991FE4 /* explosion.mp3 in Resources */,
 				475852921ECA8F0A00991FE4 /* Starfield.sks in Resources */,
-				4758529A1ECAA72900991FE4 /* torpedo.mp3 in Resources */,
+				4758529A1ECAA72900991FE4 /* missile.mp3 in Resources */,
 				4758528F1ECA8F0A00991FE4 /* Explosion.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -330,7 +330,7 @@
 			files = (
 				475852981ECAA72900991FE4 /* explosion.mp3 in Resources */,
 				475852931ECA8F0A00991FE4 /* Starfield.sks in Resources */,
-				4758529B1ECAA72900991FE4 /* torpedo.mp3 in Resources */,
+				4758529B1ECAA72900991FE4 /* missile.mp3 in Resources */,
 				475852901ECA8F0A00991FE4 /* Explosion.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
